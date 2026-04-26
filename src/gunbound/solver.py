@@ -11,6 +11,7 @@ The solver uses a coarse → refine strategy:
 from .constants import (
     ANGLE_MIN, ANGLE_MAX, POWER_MIN, POWER_MAX,
     MAX_SUGGESTIONS, SOLVER_COARSE_STEP, SOLVER_POWER_STEPS,
+    MOBILE_ANGLE_RANGE,
 )
 from .models import ShotResult
 from .physics import simulate_shot
@@ -26,6 +27,8 @@ def _solve_for_target(
     angle_step: float,
     power_steps: int,
     angle_subset: set[int] | None = None,
+    angle_min: int = ANGLE_MIN,
+    angle_max: int = ANGLE_MAX,
 ) -> list[ShotResult]:
     """Sweep angles and binary-search power for each angle."""
     v_scale   = cfg.get("v_scale",      1.45)
@@ -43,7 +46,7 @@ def _solve_for_target(
         angles = sorted(angle_subset)
     else:
         step = max(1, int(angle_step))
-        angles = list(range(ANGLE_MIN, ANGLE_MAX + 1, step))
+        angles = list(range(angle_min, angle_max + 1, step))
 
     for angle in angles:
         lo, hi = POWER_MIN, POWER_MAX
@@ -84,28 +87,34 @@ def solve(
 
     Returns up to MAX_SUGGESTIONS ShotResult objects sorted by angle.
     """
+    angle_min, angle_max = MOBILE_ANGLE_RANGE.get(mobile, (ANGLE_MIN, ANGLE_MAX))
+
     # Coarse pass
     coarse = _solve_for_target(
         target_sd, mobile, cfg, wind_strength, wind_angle_deg, height_diff,
         angle_step=SOLVER_COARSE_STEP, power_steps=SOLVER_POWER_STEPS,
+        angle_min=angle_min, angle_max=angle_max,
     )
+    # Restrict coarse results to the mobile's allowed angle range
+    coarse = [r for r in coarse if angle_min <= r.angle <= angle_max]
 
     # Refine: expand ±3° around each coarse hit, sweep every integer degree
     refined_angles: set[int] = set()
     for r in coarse:
         for da in range(-3, 4):
             a = int(r.angle) + da
-            if ANGLE_MIN <= a <= ANGLE_MAX:
+            if angle_min <= a <= angle_max:
                 refined_angles.add(a)
 
     # If no coarse hits at all, sweep everything at integer steps
     if not refined_angles:
-        refined_angles = set(range(ANGLE_MIN, ANGLE_MAX + 1))
+        refined_angles = set(range(angle_min, angle_max + 1))
 
     refined = _solve_for_target(
         target_sd, mobile, cfg, wind_strength, wind_angle_deg, height_diff,
         angle_step=1, power_steps=SOLVER_POWER_STEPS * 2,
         angle_subset=refined_angles,
+        angle_min=angle_min, angle_max=angle_max,
     )
 
     # Keep only the best power per integer angle

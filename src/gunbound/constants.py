@@ -40,6 +40,15 @@ _ARMOR_G_REF = MOBILE_PHYSICS["armor"]["gravity"]   # 73.5  (normalisation ancho
 _G_BASE      = 9.8                                   # effective g for Armor in SD units
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Per-mobile angle range overrides
+# Keys not listed here use ANGLE_MIN / ANGLE_MAX as defaults.
+# ─────────────────────────────────────────────────────────────────────────────
+MOBILE_ANGLE_RANGE: dict[str, tuple[int, int]] = {
+    "turtle":    (70, 89),
+    "kalsiddon": (70, 89),
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Solver parameters
 # ─────────────────────────────────────────────────────────────────────────────
 SOLVER_COARSE_STEP  = 2      # degrees, coarse angle sweep

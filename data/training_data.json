@@ -1294,5 +1294,176 @@
     "wind_angle": 135.2,
     "height_diff": 0.185625,
     "actual_sd": 0.3375
+  },
+  {
+    "mobile": "turtle",
+    "angle": 70.0,
+    "power": 1.89,
+    "wind_strength": 7,
+    "wind_angle": 41.900000000000006,
+    "height_diff": -0.010625,
+    "actual_sd": 0.4875
+  },
+  {
+    "mobile": "turtle",
+    "angle": 80.0,
+    "power": 1.97,
+    "wind_strength": 15,
+    "wind_angle": 39.599999999999994,
+    "height_diff": -0.003125,
+    "actual_sd": 0.425
+  },
+  {
+    "mobile": "turtle",
+    "angle": 70.0,
+    "power": 1.98,
+    "wind_strength": 1,
+    "wind_angle": -52.099999999999994,
+    "height_diff": -0.034375,
+    "actual_sd": 0.44375
+  },
+  {
+    "mobile": "turtle",
+    "angle": 79.0,
+    "power": 2.46,
+    "wind_strength": 2,
+    "wind_angle": -50.19999999999999,
+    "height_diff": -0.06125,
+    "actual_sd": 0.365
+  },
+  {
+    "mobile": "turtle",
+    "angle": 79.0,
+    "power": 2.55,
+    "wind_strength": 2,
+    "wind_angle": -52.099999999999994,
+    "height_diff": -0.039375,
+    "actual_sd": 0.4125
+  },
+  {
+    "mobile": "turtle",
+    "angle": 80.0,
+    "power": 1.57,
+    "wind_strength": 19,
+    "wind_angle": -168.0,
+    "height_diff": -0.028125,
+    "actual_sd": 0.1125
+  },
+  {
+    "mobile": "turtle",
+    "angle": 79.0,
+    "power": 2.53,
+    "wind_strength": 16,
+    "wind_angle": -17.19999999999999,
+    "height_diff": -0.0425,
+    "actual_sd": 0.375
+  },
+  {
+    "mobile": "turtle",
+    "angle": 70.0,
+    "power": 3.03,
+    "wind_strength": 26,
+    "wind_angle": -85.69999999999999,
+    "height_diff": -0.008125,
+    "actual_sd": 0.3125
+  },
+  {
+    "mobile": "turtle",
+    "angle": 77.0,
+    "power": 2.12,
+    "wind_strength": 13,
+    "wind_angle": 134.0,
+    "height_diff": 0.025,
+    "actual_sd": 0.4375
+  },
+  {
+    "mobile": "turtle",
+    "angle": 77.0,
+    "power": 1.94,
+    "wind_strength": 14,
+    "wind_angle": 134.1,
+    "height_diff": 0.013125,
+    "actual_sd": 0.375
+  },
+  {
+    "mobile": "turtle",
+    "angle": 79.0,
+    "power": 2.99,
+    "wind_strength": 1,
+    "wind_angle": -167.89999999999998,
+    "height_diff": 0.02,
+    "actual_sd": 0.5875
+  },
+  {
+    "mobile": "turtle",
+    "angle": 79.0,
+    "power": 2.79,
+    "wind_strength": 2,
+    "wind_angle": 113.9,
+    "height_diff": 0.0075,
+    "actual_sd": 0.53375
+  },
+  {
+    "mobile": "turtle",
+    "angle": 79.0,
+    "power": 3.14,
+    "wind_strength": 2,
+    "wind_angle": 27.80000000000001,
+    "height_diff": 0.005,
+    "actual_sd": 0.65
+  },
+  {
+    "mobile": "turtle",
+    "angle": 70.0,
+    "power": 2.32,
+    "wind_strength": 19,
+    "wind_angle": -153.3,
+    "height_diff": -0.056875,
+    "actual_sd": 0.41875
+  },
+  {
+    "mobile": "turtle",
+    "angle": 70.0,
+    "power": 2.9,
+    "wind_strength": 4,
+    "wind_angle": -139.2,
+    "height_diff": -0.056875,
+    "actual_sd": 0.8375
+  },
+  {
+    "mobile": "turtle",
+    "angle": 79.0,
+    "power": 3.02,
+    "wind_strength": 4,
+    "wind_angle": 118.30000000000001,
+    "height_diff": 0.076875,
+    "actual_sd": 0.67875
+  },
+  {
+    "mobile": "turtle",
+    "angle": 70.0,
+    "power": 3.01,
+    "wind_strength": 24,
+    "wind_angle": 160.8,
+    "height_diff": -0.02125,
+    "actual_sd": 0.9875
+  },
+  {
+    "mobile": "turtle",
+    "angle": 79.0,
+    "power": 2.66,
+    "wind_strength": 24,
+    "wind_angle": -161.10000000000002,
+    "height_diff": -0.013125,
+    "actual_sd": 0.25
+  },
+  {
+    "mobile": "turtle",
+    "angle": 79.0,
+    "power": 3.5,
+    "wind_strength": 25,
+    "wind_angle": 161.2,
+    "height_diff": 0.009375,
+    "actual_sd": 0.9125
   }
 ]
