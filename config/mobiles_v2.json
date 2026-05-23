@@ -1,9 +1,9 @@
 {
   "armor": {
-    "v_scale": 1.3208,
-    "wind_x_coeff": 0.096783,
-    "wind_y_coeff": 0.091876,
-    "power_exp": 0.956424
+    "v_scale": 1.318974,
+    "wind_x_coeff": 0.096587,
+    "wind_y_coeff": 0.094668,
+    "power_exp": 0.958878
   },
   "mage": {
     "v_scale": 1.3012521873088139,
@@ -61,8 +61,8 @@
   },
   "ice": {
     "v_scale": 1.467628,
-    "wind_x_coeff": 0.1,
-    "wind_y_coeff": 0.1,
+    "wind_x_coeff": 0.099181,
+    "wind_y_coeff": 0.046886,
     "power_exp": 0.844511
   },
   "turtle": {
@@ -90,10 +90,10 @@
     "wind_y_coeff": 0.089263
   },
   "kalsiddon": {
-    "v_scale": 1.4477050421360715,
-    "power_exp": 0.958738,
-    "wind_x_coeff": 0.118129,
-    "wind_y_coeff": 0.116235
+    "v_scale": 1.395004,
+    "power_exp": 1.025811,
+    "wind_x_coeff": 0.107874,
+    "wind_y_coeff": 0.119308
   },
   "jfrog": {
     "v_scale": 1.1339877587503926,

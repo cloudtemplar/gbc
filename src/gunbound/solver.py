@@ -11,7 +11,7 @@ The solver uses a coarse → refine strategy:
 from .constants import (
     ANGLE_MIN, ANGLE_MAX, POWER_MIN, POWER_MAX,
     MAX_SUGGESTIONS, SOLVER_COARSE_STEP, SOLVER_POWER_STEPS,
-    MOBILE_ANGLE_RANGE,
+    MOBILE_ANGLE_RANGE, CLOSE_RANGE_THRESHOLD, HIGH_ANGLE_MIN,
 )
 from .models import ShotResult
 from .physics import simulate_shot
@@ -158,5 +158,19 @@ def solve(
     remaining_slots = MAX_SUGGESTIONS - len(chosen)
     if remaining_slots > 0:
         chosen = others[:remaining_slots] + chosen
+
+    # For close-range shots, always include the highest viable angle (≥ HIGH_ANGLE_MIN)
+    # so the player has a steep-arc option. Replaces the last chosen slot if needed.
+    if target_sd < CLOSE_RANGE_THRESHOLD:
+        high_angle_candidates = [
+            r for r in deduped
+            if r.angle >= HIGH_ANGLE_MIN and r not in chosen
+        ]
+        if high_angle_candidates:
+            best_high = max(high_angle_candidates, key=lambda r: r.angle)
+            if len(chosen) >= MAX_SUGGESTIONS:
+                chosen[-1] = best_high   # replace last (lowest-priority) slot
+            else:
+                chosen.append(best_high)
 
     return sorted(chosen, key=lambda r: r.angle)
