@@ -59,6 +59,8 @@ ANGLE_MAX           = 89
 POWER_MIN           = 0.5
 POWER_MAX           = 4.0
 MAX_SUGGESTIONS     = 5
+CLOSE_RANGE_THRESHOLD = 0.5  # SD below this → always include a high-angle suggestion
+HIGH_ANGLE_MIN        = 80   # minimum angle considered "high" for close-range slot
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Data-confidence thresholds (same scale as calc_legacy.py)
