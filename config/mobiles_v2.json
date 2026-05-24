@@ -66,10 +66,10 @@
     "power_exp": 0.844511
   },
   "turtle": {
-    "v_scale": 1.264364,
-    "power_exp": 0.998624,
-    "wind_x_coeff": 0.098295,
-    "wind_y_coeff": 0.118413
+    "v_scale": 1.24723,
+    "power_exp": 1.014212,
+    "wind_x_coeff": 0.099312,
+    "wind_y_coeff": 0.093519
   },
   "grub": {
     "v_scale": 1.2019139314654896,

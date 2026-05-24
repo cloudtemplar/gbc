@@ -6,6 +6,9 @@ A physics-simulation + self-learning shot calculator for GunBound Classic. Given
 
 ## Quick Start
 
+> **Run as Administrator** when playing GitzWC (or any version that launches elevated).
+> Windows blocks hotkey detection from non-elevated processes when an elevated game window has focus.
+
 ```
 python main.py
 ```
@@ -58,6 +61,9 @@ Every 5 recorded shots the model auto-recalibrates for that mobile.
 | `python scripts/import_baseline.py` | Bulk-import reference shots into training data |
 | `python tools/ruler.py` | Launch on-screen SD ruler overlay |
 | `python tools/gen_ruler.py` | Regenerate `assets/ruler.png` (run after ruler config changes) |
+| `python tools/wind_reader_gitzwc.py` | Run GitzWC wind reader standalone |
+| `python tools/wind_reader_gitzwc.py --capture-template` | (Re)capture wind rose template |
+| `python main.py --wind-reader gitzwc` | Start calculator with GitzWC wind reader pre-selected |
 
 ---
 
@@ -178,6 +184,8 @@ gunbound/
 ├── tools/
 │   ├── ruler.py           # on-screen SD ruler overlay
 │   ├── gen_ruler.py       # regenerates assets/ruler.png
+│   ├── wind_reader.py     # classic GunBound wind reader (fixed HUD position)
+│   ├── wind_reader_gitzwc.py  # GitzWC wind reader — auto-detects wind rose on screen
 │   └── memory_reader.py   # process memory reader (research tool)
 ├── scripts/
 │   └── import_baseline.py # bulk-import reference shots into training data
@@ -261,6 +269,59 @@ Every 5 recorded shots for a mobile, calibration reruns automatically. The updat
 - **Vary wind conditions.** Shots recorded only at zero wind can't calibrate wind coefficients.
 - **Be consistent with SD reading.** Inconsistent readings are the main source of noise.
 - **Don't record bad inputs.** If you mis-read the wind and the shot landed wildly off, skip recording that sample.
+
+---
+
+## Wind Reader (GitzWC)
+
+`tools/wind_reader_gitzwc.py` automatically locates and reads the wind rose on screen, then writes angle and stability to `data/wind.json`, which the calculator polls to auto-fill the wind fields.
+
+### Requirements
+
+```
+pip install mss opencv-python numpy
+```
+
+### One-time setup — capture template
+
+With GitzWC open and the wind rose visible:
+
+```
+python tools/wind_reader_gitzwc.py --capture-template
+```
+
+Click the centre of the wind rose when prompted. The tool saves `assets/wind_rose_template.png`. Redo this only if the game resolution changes.
+
+### Usage
+
+The reader is launched automatically when you start `main.py`. On startup you will be prompted:
+
+```
+Wind reader:  [1] Classic (fixed position)  [2] GitzWC (auto-detect)
+```
+
+Choose **2** for GitzWC. To skip the prompt, pass the flag directly:
+
+```
+python main.py --wind-reader gitzwc
+```
+
+### Standalone diagnostics
+
+| Command | What it does |
+|---|---|
+| `python tools/wind_reader_gitzwc.py` | Run the reader in the foreground |
+| `python tools/wind_reader_gitzwc.py --locate` | Single scan — draws a box around the best match and saves `wind_locate_debug.png` |
+| `python tools/wind_reader_gitzwc.py --debug` | Full annotated screenshot saved to `wind_debug_gitzwc.png` |
+| `python tools/wind_reader_gitzwc.py --save-screen` | Save raw screen capture for verification |
+
+### `data/wind.json` format
+
+```json
+{ "angle": 73, "strength": null, "stable": true, "ts": 1748123456.7 }
+```
+
+`stable: true` means the detected angle has been consistent across the last several frames. The calculator waits for stability before auto-filling.
 
 ---
 

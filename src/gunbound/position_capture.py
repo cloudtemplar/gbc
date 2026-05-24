@@ -22,9 +22,10 @@ from __future__ import annotations
 
 import ctypes
 import threading
+import time
 from dataclasses import dataclass, field
 
-from .constants import HOTKEY_OWN, HOTKEY_TARGET
+from .constants import HOTKEY_OWN_VK, HOTKEY_TARGET_VK
 
 # ── Pixel-to-SD scale (matches tools/gen_ruler.py TICK_PX = 200) ──────────────
 _PIXELS_PER_SLICE: int = 200   # 200 px = 0.125 SD = 1 slice
@@ -36,13 +37,14 @@ _SLICE_MAX: float = 24.0
 _HEIGHT_MIN: float = -8.0
 _HEIGHT_MAX: float = 8.0
 
-# ── pynput import (optional) ──────────────────────────────────────────────────
-try:
-    from pynput import keyboard as _pynput_keyboard
-    HAS_PYNPUT: bool = True
-except ImportError:
-    HAS_PYNPUT = False
-    _pynput_keyboard = None  # type: ignore[assignment]
+# ── GetAsyncKeyState helper ───────────────────────────────────────────────────
+_GetAsyncKeyState = ctypes.windll.user32.GetAsyncKeyState
+
+
+def _key_down(vk: int) -> bool:
+    """Return True if the given virtual key is currently held down."""
+    return bool(_GetAsyncKeyState(vk) & 0x8000)
+
 
 # ── DPI awareness (per-monitor) ───────────────────────────────────────────────
 try:
@@ -177,33 +179,53 @@ class CaptureState:
 
 # ── Listener ──────────────────────────────────────────────────────────────────
 
-def start_listener(state: CaptureState) -> object | None:
+_POLL_INTERVAL: float = 0.05   # seconds between key-state polls
+
+
+def start_listener(state: CaptureState) -> threading.Thread:
     """
-    Start a background daemon hotkey listener using pynput.
+    Start a background daemon thread that polls GetAsyncKeyState for hotkeys.
 
-    Binds Ctrl+1 (HOTKEY_OWN) and Ctrl+2 (HOTKEY_TARGET) as global hotkeys that
-    respond while any window (including the game window) has focus.
+    Uses Win32 GetAsyncKeyState instead of WH_KEYBOARD_LL hooks so that it
+    works with games that use DirectInput / Raw Input (which block hook-based
+    listeners like pynput).  RegisterHotKey is also skipped because GitzWC
+    registers Ctrl+1 / Ctrl+2 itself (err 1409).
 
-    Returns the listener object if started, None if pynput is unavailable.
-    The listener thread is a daemon — it exits automatically when the main process ends.
+    IMPORTANT: the calculator must be run as Administrator (right-click →
+    "Run as administrator") when the game is also running as Administrator.
+    Windows UIPI prevents a non-elevated process from reading the VK state of
+    an elevated window, so GetAsyncKeyState returns 0 for all keys otherwise.
+
+    Hotkeys are defined by HOTKEY_OWN_VK and HOTKEY_TARGET_VK in constants.py
+    as tuples of VK codes (any length) — currently Ctrl+Shift+Z and Ctrl+Shift+X.
+
+    Returns the polling Thread (daemon).  The thread exits automatically when
+    the main process ends.
     """
-    if not HAS_PYNPUT:
-        return None
+    # Edge-trigger: only fire once per physical press, not every poll tick.
+    own_prev   = False
+    target_prev = False
 
-    def _on_own() -> None:
-        x, y = _get_cursor_pos()
-        state.set_own(x, y)
-        print(f"\n  [Capture] 1st pos ({x}, {y})", flush=True)
+    def _poll() -> None:
+        nonlocal own_prev, target_prev
+        while True:
+            own_down    = all(_key_down(vk) for vk in HOTKEY_OWN_VK)
+            target_down = all(_key_down(vk) for vk in HOTKEY_TARGET_VK)
 
-    def _on_target() -> None:
-        x, y = _get_cursor_pos()
-        state.set_target(x, y)
-        print(f"\n  [Capture] 2nd pos ({x}, {y})", flush=True)
+            if own_down and not own_prev:
+                x, y = _get_cursor_pos()
+                state.set_own(x, y)
+                print(f"\n  [Capture] 1st pos ({x}, {y})", flush=True)
 
-    listener = _pynput_keyboard.GlobalHotKeys({
-        HOTKEY_OWN:    _on_own,
-        HOTKEY_TARGET: _on_target,
-    })
-    listener.daemon = True
-    listener.start()
-    return listener
+            if target_down and not target_prev:
+                x, y = _get_cursor_pos()
+                state.set_target(x, y)
+                print(f"\n  [Capture] 2nd pos ({x}, {y})", flush=True)
+
+            own_prev    = own_down
+            target_prev = target_down
+            time.sleep(_POLL_INTERVAL)
+
+    t = threading.Thread(target=_poll, daemon=True)
+    t.start()
+    return t

@@ -1,4 +1,5 @@
 # This script only works in GunBound.gme (open-source Gunbound server) and is not compatible with the official Gunbound game client.
+# Used only for reference of reverse engineered gravity and projectile speed values for each mobile.
 
 import sys
 from enum import IntEnum

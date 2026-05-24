@@ -7,7 +7,9 @@ Pillow
 # Optional: tools/memory_reader.py (process memory reading)
 # pymem
 # PyQt5
-# numpy
-# mss
-# opencv-python
 # pyautogui
+
+# Required: tools/wind_reader_gitzwc.py (GitzWC dynamic wind rose detection)
+numpy
+mss
+opencv-python

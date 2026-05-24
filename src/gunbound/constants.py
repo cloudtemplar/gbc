@@ -67,10 +67,24 @@ MATCH_CLOSE_THRESHOLD = 0.08   # d_sim below this → direct data suggestion
 MATCH_LOOSE_THRESHOLD = 0.15   # d_sim below this → residual correction applied
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Position capture hotkeys (pynput format)
+# Position capture hotkeys (Win32 virtual-key codes for GetAsyncKeyState polling)
+#
+# The default Ctrl+1 / Ctrl+2 are claimed by GitzWC emotes (RegisterHotKey
+# err 1409) and the game also uses DirectInput for char keys, blocking
+# WH_KEYBOARD_LL hooks.  GetAsyncKeyState + different keys sidesteps both.
+#
+# To change: update the two _VK_* lines and the two *_LABEL strings.
+# Common VK codes: F1–F12 = 0x70–0x7B  Insert=0x2D  Delete=0x2E
 # ─────────────────────────────────────────────────────────────────────────────
-HOTKEY_OWN    = "<ctrl>+1"   # mark own character position
-HOTKEY_TARGET = "<ctrl>+2"   # mark target position
+_VK_CONTROL = 0x11
+_VK_SHIFT   = 0x10
+_VK_Z       = 0x5A
+_VK_X       = 0x58
+
+HOTKEY_OWN_VK       = (_VK_CONTROL, _VK_SHIFT, _VK_Z)   # Ctrl+Shift+Z → mark own position
+HOTKEY_TARGET_VK    = (_VK_CONTROL, _VK_SHIFT, _VK_X)   # Ctrl+Shift+X → mark target position
+HOTKEY_OWN_LABEL    = "Ctrl+Shift+Z"
+HOTKEY_TARGET_LABEL = "Ctrl+Shift+X"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Known mobiles (derived from MOBILE_PHYSICS)

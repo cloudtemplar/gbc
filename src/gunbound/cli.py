@@ -29,9 +29,10 @@ from .storage import (
 )
 
 try:
-    from .position_capture import CaptureState, HAS_PYNPUT, start_listener
+    from .position_capture import CaptureState, start_listener
+    _HAS_POSITION_CAPTURE = True
 except ImportError:
-    HAS_PYNPUT = False
+    _HAS_POSITION_CAPTURE = False
     CaptureState = None  # type: ignore[assignment,misc]
     start_listener = lambda s: None  # type: ignore[assignment]
 
@@ -63,9 +64,14 @@ _Color = _init_colors()
 # Wind reader helpers
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _start_wind_reader() -> subprocess.Popen | None:
-    """Spawn wind_reader.py as a background process. Returns Popen or None."""
-    script = PROJECT_ROOT / "tools" / "wind_reader.py"
+def _start_wind_reader(reader: str = "classic") -> subprocess.Popen | None:
+    """Spawn wind reader as a background process. Returns Popen or None.
+
+    reader: "classic" → tools/wind_reader.py  (fixed-position, original)
+            "gitzwc"  → tools/wind_reader_gitzwc.py  (dynamic auto-detect)
+    """
+    script_name = "wind_reader_gitzwc.py" if reader == "gitzwc" else "wind_reader.py"
+    script = PROJECT_ROOT / "tools" / script_name
     if not script.exists():
         return None
     try:
@@ -77,6 +83,21 @@ def _start_wind_reader() -> subprocess.Popen | None:
         return proc
     except OSError:
         return None
+
+
+def _prompt_wind_reader_choice() -> str:
+    """Ask the player which wind reader to use. Returns 'classic' or 'gitzwc'.
+
+    Falls back to 'classic' silently if stdin is not a TTY.
+    """
+    if not sys.stdin.isatty():
+        return "classic"
+    print("  Wind reader:  [1] Classic (fixed position)  [2] GitzWC (auto-detect)")
+    try:
+        choice = input("  Choice [1]: ").strip()
+    except (EOFError, KeyboardInterrupt):
+        return "classic"
+    return "gitzwc" if choice == "2" else "classic"
 
 
 def _read_wind_angle() -> float | None:
@@ -219,12 +240,24 @@ def training_mode(mobiles_cfg: dict) -> None:
 
 def main() -> None:
     # ── CLI flags ──────────────────────────────────────────────────────────
-    known_flags = {"--calibrate", "--validate", "--training", "--infer-priors", "--dry-run"}
-    unknown = [a for a in sys.argv[1:] if a.startswith("--") and a not in known_flags]
+    known_flags = {"--calibrate", "--validate", "--training", "--infer-priors", "--dry-run", "--wind-reader"}
+    # Use a.split("=")[0] so --wind-reader=gitzwc is accepted by the validator.
+    unknown = [a for a in sys.argv[1:] if a.startswith("--") and a.split("=")[0] not in known_flags]
     if unknown:
         print(f"Unknown flag(s): {', '.join(unknown)}")
         print(f"  Valid flags: {', '.join(sorted(known_flags))}")
         sys.exit(1)
+
+    # Parse optional --wind-reader {classic|gitzwc} (both --flag value and --flag=value forms).
+    _wr: str | None = None
+    for _i, _a in enumerate(sys.argv):
+        if _a.startswith("--wind-reader="):
+            _wr = _a.split("=", 1)[1]
+            break
+        if _a == "--wind-reader" and _i + 1 < len(sys.argv):
+            _wr = sys.argv[_i + 1]
+            break
+    wind_reader_arg: str | None = _wr if _wr in ("classic", "gitzwc") else None
 
     if "--infer-priors" in sys.argv:
         dry_run = "--dry-run" in sys.argv
@@ -319,19 +352,21 @@ def main() -> None:
     print(f"  Mobile set to: {mobile_input.upper()}\n")
 
     # Start wind reader in background
-    wind_proc = _start_wind_reader()
+    reader_choice = wind_reader_arg or _prompt_wind_reader_choice()
+    wind_proc = _start_wind_reader(reader=reader_choice)
     if wind_proc:
-        print("  Wind reader started in background.\n")
+        print(f"  Wind reader started ({reader_choice}) in background.\n")
 
-    # Start position capture hotkey listener (if pynput is available)
-    capture_state = CaptureState() if HAS_PYNPUT else None
+    # Start position capture hotkey listener
+    from .constants import HOTKEY_OWN_LABEL, HOTKEY_TARGET_LABEL
+    capture_state = CaptureState() if _HAS_POSITION_CAPTURE else None
     if capture_state is not None:
         start_listener(capture_state)
-        print("  Hotkeys active: Ctrl+1 = mark own position, Ctrl+2 = mark target.\n")
+        print(f"  Hotkeys active: {HOTKEY_OWN_LABEL} = mark own position, {HOTKEY_TARGET_LABEL} = mark target.\n")
 
     while True:
         try:
-            # ── Position capture override (Ctrl+1 / Ctrl+2 pre-filled) ──────
+            # ── Position capture override (hotkey pre-filled) ──────────────────
             pair = capture_state.consume() if capture_state is not None else None
             if pair is not None and not pair.is_valid:
                 print("  [Capture] Positions out of range — using manual input.")
